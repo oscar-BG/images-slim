@@ -17,19 +17,17 @@ COPY nginx.conf /etc/nginx
 # Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copiar el archivo composer.json
-COPY composer.json /var/www/
-
 # Establecer el directorio de trabajo
 WORKDIR /var/www
 
-# Instalar las dependencias
-RUN composer install --no-scripts --no-autoloader
+# Crear el directorio para el proyecto
+RUN mkdir /var/www/my-project
 
-# Copiar el código de la aplicación
-COPY . /var/www
+# Cambiar al directorio del proyecto
+WORKDIR /var/www/my-project
 
-# RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+# Crear una nueva aplicación Slim
+RUN composer create-project slim/slim-skeleton .
 
 # Exponer el puerto 80
 EXPOSE 80
