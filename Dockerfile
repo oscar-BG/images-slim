@@ -14,20 +14,24 @@ RUN docker-php-ext-install zip
 # Copiar la configuración de Nginx
 COPY nginx.conf /etc/nginx
 
+# Establecer el directorio de trabajo
+WORKDIR /var/www/html/app
+
 # Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Establecer el directorio de trabajo
-WORKDIR /var/www
+# Copiar el archivo de configuración de Composer y realizar la instalación
+COPY composer.json /var/www/html/app
+RUN composer install --no-scripts --no-autoloader
 
-# Crear el directorio para el proyecto
-RUN mkdir /var/www/my-project
 
-# Cambiar al directorio del proyecto
-WORKDIR /var/www/my-project
+# Copiar el resto de tu aplicación
+COPY . /var/www/html/app/
 
-# Crear una nueva aplicación Slim
-RUN composer create-project slim/slim-skeleton .
+
+# Ejecutar los scripts de Composer y ajustar los permisos
+RUN composer dump-autoload --optimize
+RUN chown -R www-data:www-data /var/www/html
 
 # Exponer el puerto 80
 EXPOSE 80
